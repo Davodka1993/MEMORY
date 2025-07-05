@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Le Jeu des Paires</title>
+    <style>
+        /* Styles CSS intégrés pour le jeu de Memory */
+        body {
+            font-family: 'Arial', sans-serif; /* Police de caractères simple */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* Hauteur minimale de 100% de la fenêtre */
+            margin: 0;
+            background-color: #f0f0f0; /* Couleur de fond légère */
+            overflow: hidden; /* Empêche le défilement si le modal est actif */
+            box-sizing: border-box; /* Inclut le padding et la bordure dans la largeur/hauteur */
+        }
+
+        .game-container {
+            background-color: #fff; /* Fond blanc pour le conteneur du jeu */
+            padding: 20px;
+            border-radius: 10px; /* Bords arrondis */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Ombre légère */
+            text-align: center;
+            width: 100%;
+            max-width: 450px; /* Limite la largeur sur les grands écrans */
+            margin: 10px; /* Un peu d'espace sur les bords */
+            box-sizing: border-box;
+            position: relative; /* Nécessaire pour positionner le checkmark central */
+            z-index: 1; /* Assure que le conteneur est au-dessus du checkmark central */
+        }
+
+        h1 {
+            color: #333; /* Couleur du titre */
+            font-size: 1.5em; /* Taille du titre réduite */
+            margin-bottom: 15px;
+        }
+
+        .score-board {
+            font-size: 1.2em;
+            color: #555;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .memory-game {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* 4 colonnes de largeur égale */
+            grid-template-rows: repeat(4, 1fr);    /* 4 rangées de hauteur égale */
+            gap: 10px; /* Espace entre les cartes */
+            width: 100%;
+            max-width: 350px; /* Taille max pour la grille sur grands mobiles */
+            margin: 0 auto;
+            perspective: 1000px; /* Pour l'animation 3D flip */
+        }
+
+        .card {
+            width: 100%;
+            height: 80px; /* Hauteur fixe pour les cartes, s'adaptera en largeur */
+            position: relative;
+            transform-style: preserve-3d; /* Permet la transformation 3D des enfants */
+            transition: transform 0.5s; /* Animation de retournement */
+            cursor: pointer;
+            box-sizing: border-box;
+            border-radius: 8px; /* Bords légèrement arrondis */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg); /* Retourne la carte sur l'axe Y */
+        }
+
+        .card .front-face,
+        .card .back-face {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            backface-visibility: hidden; /* Cache la face arrière quand elle n'est pas visible */
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        /* La couleur du dos de la carte (front-face) sera définie par JavaScript */
+        .card .front-face {
+            transform: rotateY(0deg);
+            font-size: 2em;
+            color: white;
+        }
+
+        .card .back-face {
+            background-color: #eee; /* Fond clair pour l'image */
+            transform: rotateY(180deg);
+        }
+
+        .card .back-face img {
+            max-width: 90%; /* L'image prend 90% de la largeur de la carte */
+            max-height: 90%; /* L'image prend 90% de la hauteur de la carte */
+            object-fit: contain; /* L'image s'adapte sans être coupée */
+            border-radius: 5px;
+        }
+
+        /* Style pour les cartes trouvées : elles s'estompent et deviennent inactives */
+        .card.matched {
+            opacity: 0; /* Les cartes s'estompent complètement */
+            cursor: default;
+            pointer-events: none; /* Rendre les cartes inactives aux clics */
+            transition: opacity 0.8s ease-out; /* Transition douce pour l'estompage */
+        }
+
+        /* Styles pour l'animation du checkmark SVG central */
+        .central-checkmark-container {
+            position: fixed; /* Fixé par rapport à la fenêtre */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001; /* Au-dessus de tout, y compris le modal */
+            pointer-events: none; /* Ne doit pas bloquer les clics sous lui */
+            opacity: 0; /* Commence caché */
+            transition: opacity 0.3s ease-out; /* Transition pour l'apparition/disparition du conteneur */
+        }
+
+        .central-checkmark-container.show {
+            opacity: 1;
+        }
+
+        .central-checkmark-svg {
+            width: 150px; /* Grande taille pour le checkmark central */
+            height: 150px;
+            transform: scale(0.8); /* Commence légèrement plus petit */
+            transition: transform 0.3s ease-out;
+        }
+
+        .central-checkmark-container.show .central-checkmark-svg {
+            transform: scale(1); /* S'agrandit à sa taille normale */
+        }
+
+        .central-checkmark-svg path {
+            fill: none;
+            stroke: #28a745; /* Couleur verte du checkmark */
+            stroke-width: 8; /* Épaisseur du trait */
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 200; /* Valeur plus grande que la longueur du chemin */
+            stroke-dashoffset: 200; /* Commence caché (non dessiné) */
+            transition: stroke-dashoffset 0.8s ease-in-out; /* Animation de dessin */
+        }
+
+        .central-checkmark-container.show .central-checkmark-svg path {
+            stroke-dashoffset: 0; /* Dessine le checkmark */
+        }
+
+        .message {
+            margin-top: 20px;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .video-container {
+            margin-top: 20px;
+            background-color: #e0f2f7; /* Fond bleu clair */
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #a7d9eb; /* Bordure bleue */
+        }
+
+        .video-container video {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 8px;
+        }
+
+        .video-container p {
+            margin-top: 10px;
+            font-size: 1.1em;
+            color: #007bff; /* Texte bleu */
+        }
+
+        .hidden {
+            display: none !important; /* Cache l'élément, avec !important pour plus de robustesse */
+        }
+
+        /* Modal d'agrandissement de carte */
+        .card-modal {
+            position: fixed; /* Fixé par rapport à la fenêtre */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8); /* Fond semi-transparent noir */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000; /* Assure qu'il est au-dessus de tout */
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .card-modal img {
+            max-width: 90%; /* Max 90% de la largeur de la fenêtre */
+            max-height: 90%; /* Max 90% de la hauteur de la fenêtre */
+            object-fit: contain; /* L'image s'adapte sans être coupée */
+            border: 5px solid white; /* Bordure blanche autour de l'image */
+            border-radius: 10px; /* Bords arrondis */
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5); /* Ombre lumineuse */
+            cursor: pointer; /* Le curseur indique qu'on peut cliquer pour fermer */
+        }
+
+        /* Media Queries pour l'adaptabilité sur différentes tailles d'écrans */
+        @media (max-width: 400px) {
+            .card {
+                height: 70px; /* Ajuste la hauteur des cartes pour les très petits écrans */
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            .score-board {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Réussis ce memory en moins de 16 coups et débloque une vidéo 👶 !</h1>
+        <div class="score-board">
+            Coups: <span id="moves-count">0</span> / 16
+        </div>
+        <div class="memory-game" id="memory-game">
+            <!-- Les cartes seront générées ici par JavaScript -->
+        </div>
+        <div class="message" id="game-message"></div>
+        <div class="video-container hidden" id="video-container">
+            <!-- URL de votre vidéo Streamable -->
+            <video id="reward-video" controls>
+                <source src="https://streamable.com/ybbbzx" type="video/mp4">
+                Votre navigateur ne supporte pas la lecture de vidéos.
+            </video>
+            <p>Félicitations ! Vous avez débloqué cette vidéo spéciale !</p>
+        </div>
+    </div>
+
+    <!-- Conteneur pour l'animation du checkmark central -->
+    <div class="central-checkmark-container" id="central-checkmark-container">
+        <svg class="central-checkmark-svg" viewBox="0 0 24 24">
+            <path d="M5 13l4 4L19 7"></path>
+        </svg>
+    </div>
+
+    <div class="card-modal hidden" id="card-modal">
+        <img src="" alt="Carte agrandie" id="modal-image">
+    </div>
+
+    <script>
+        /* Logique JavaScript intégrée pour le jeu de Memory */
+        document.addEventListener('DOMContentLoaded', () => {
+            // Récupération des éléments du DOM
+            const gameBoard = document.getElementById('memory-game');
+            const movesCountSpan = document.getElementById('moves-count');
+            const gameMessage = document.getElementById('game-message');
+            const videoContainer = document.getElementById('video-container');
+            const rewardVideo = document.getElementById('reward-video');
+            const cardModal = document.getElementById('card-modal');
+            const modalImage = document.getElementById('modal-image');
+            const centralCheckmarkContainer = document.getElementById('central-checkmark-container');
+
+            // URLs DIRECTES de vos 8 images hébergées
+            const imageNames = [
+                'https://i.ibb.co/gbQnLfr6/image-af3002.png',
+                'https://i.ibb.co/zh8v26gR/image-af3002-1.png',
+                'https://i.ibb.co/Dgvjpx1Z/image-af3002-2.png',
+                'https://i.ibb.co/x8S5Y24k/image-af3002-3.png',
+                'https://i.ibb.co/PGz4T6By/image-af3002-4.png',
+                'https://i.ibb.co/mVWTB7wt/image-af3002-5.png',
+                'https://i.ibb.co/zhV5rgtJ/image-af3002-6.png',
+                'https://i.ibb.co/7xZ1ZDms/image-af3002-7.png'
+            ];
+
+            let cards = [];
+            let flippedCards = [];
+            let matchedCards = 0;
+            let moves = 0;
+            let lockBoard = false; // Verrouille le plateau pour empêcher d'autres clics pendant les animations/vérifications
+
+            const MAX_MOVES = 16; // Seuil de coups modifié à 16
+
+            // Couleurs pour le dos des cartes
+            const colorBlue = '#4A90E2'; // Un joli bleu
+            const colorPink = '#FF69B4'; // Un joli rose
+
+            function shuffle(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+            }
+
+            function initializeGame() {
+                cards = [...imageNames, ...imageNames];
+                shuffle(cards);
+
+                gameBoard.innerHTML = '';
+                flippedCards = [];
+                matchedCards = 0;
+                moves = 0;
+                lockBoard = false;
+                movesCountSpan.textContent = moves;
+                gameMessage.textContent = '';
+                videoContainer.classList.add('hidden');
+                rewardVideo.pause();
+                rewardVideo.currentTime = 0;
+                cardModal.classList.add('hidden'); // Assure que le modal est caché au démarrage du jeu
+                centralCheckmarkContainer.classList.remove('show'); // Cache le checkmark central
+
+                cards.forEach((imageURL, index) => {
+                    const cardElement = document.createElement('div');
+                    cardElement.classList.add('card');
+                    cardElement.dataset.name = imageURL;
+                    cardElement.dataset.index = index;
+
+                    // Détermine la couleur du dos de la carte (front-face)
+                    const row = Math.floor(index / 4); // Pour une grille 4x4
+                    const col = index % 4;
+                    const frontFaceColor = (row + col) % 2 === 0 ? colorBlue : colorPink;
+
+                    cardElement.innerHTML = `
+                        <div class="front-face" style="background-color: ${frontFaceColor};"></div>
+                        <div class="back-face"><img src="${imageURL}" alt="carte" onerror="this.onerror=null;this.src='https://placehold.co/150x150/cccccc/000000?text=Image+non+trouvée';"></div>
+                    `;
+                    cardElement.addEventListener('click', flipCard);
+                    gameBoard.appendChild(cardElement);
+                });
+            }
+
+            function flipCard() {
+                if (lockBoard) return;
+                if (this === flippedCards[0]) return; // Empêche de cliquer deux fois sur la même carte
+
+                this.classList.add('flipped');
+
+                if (flippedCards.length === 0) {
+                    // Première carte retournée
+                    flippedCards[0] = this;
+                    showModal(this.querySelector('.back-face img').src);
+                    // Le modal reste ouvert, l'utilisateur devra cliquer sur la 2ème carte
+                } else {
+                    // Deuxième carte retournée
+                    flippedCards[1] = this;
+                    moves++;
+                    movesCountSpan.textContent = moves;
+                    lockBoard = true; // Verrouille le plateau pour empêcher d'autres clics pendant le traitement
+
+                    showModal(this.querySelector('.back-face img').src); // Affiche la deuxième carte agrandie
+
+                    // Vérifie la paire après un court délai pour que l'utilisateur voie la deuxième carte agrandie
+                    setTimeout(() => {
+                        checkForMatch();
+                    }, 800); // Laisse l'utilisateur voir la deuxième carte agrandie pendant 0.8 secondes
+                }
+            }
+
+            // Cette fonction est appelée automatiquement après la fermeture du modal
+            function checkForMatch() {
+                const [card1, card2] = flippedCards;
+                const isMatch = card1.dataset.name === card2.dataset.name;
+
+                if (isMatch) {
+                    // Si c'est une paire, le modal se ferme automatiquement et les animations se déclenchent
+                    hideModalAndProcess(); // Appel à hideModalAndProcess pour fermer le modal
+                    disableCards();
+                } else {
+                    // Si ce n'est pas une paire, le modal reste ouvert, l'utilisateur doit cliquer pour le fermer
+                    // La logique de unflipCards sera appelée par hideModalAndProcess
+                }
+            }
+
+            function disableCards() {
+                const [card1, card2] = flippedCards;
+
+                // Affiche l'animation du checkmark central
+                centralCheckmarkContainer.classList.add('show');
+
+                // Après l'animation du checkmark central (environ 0.8s pour le dessin + 0.3s pour le scale)
+                setTimeout(() => {
+                    // Applique la classe 'matched' pour estomper les cartes
+                    card1.classList.add('matched');
+                    card2.classList.add('matched');
+
+                    // Retire les écouteurs d'événements pour que les cartes ne soient plus cliquables
+                    card1.removeEventListener('click', flipCard);
+                    card2.removeEventListener('click', flipCard);
+
+                    // Cache l'animation du checkmark central
+                    centralCheckmarkContainer.classList.remove('show');
+
+                    // Après que les cartes aient fini de s'estomper (0.8s), on réinitialise le plateau etc.
+                    setTimeout(() => {
+                        matchedCards += 2;
+                        resetBoard();
+                        checkGameEnd();
+                    }, 800); // Correspond à la durée de la transition CSS pour l'opacité des cartes
+                }, 1000); // Délai pour laisser le checkmark central s'animer avant que les cartes ne disparaissent
+            }
+
+            function unflipCards() {
+                const [card1, card2] = flippedCards;
+                // Les cartes se retournent après un court délai
+                setTimeout(() => {
+                    card1.classList.remove('flipped');
+                    card2.classList.remove('flipped');
+                    resetBoard();
+                }, 700); // Délai réduit à 0.7 secondes pour retourner les cartes
+            }
+
+            function resetBoard() {
+                flippedCards = [];
+                lockBoard = false; // Déverrouille le plateau
+            }
+
+            function checkGameEnd() {
+                if (matchedCards === cards.length) {
+                    gameMessage.textContent = 'Bravo ! Vous avez trouvé toutes les paires !';
+                    if (moves <= MAX_MOVES) {
+                        gameMessage.textContent += ` Vous avez gagné en ${moves} coups ! Vidéo débloquée !`;
+                        videoContainer.classList.remove('hidden');
+                        rewardVideo.play();
+                    } else {
+                        gameMessage.textContent += ` Mais vous avez utilisé ${moves} coups (max ${MAX_MOVES}). Réessayez pour la vidéo !`;
+                    }
+                    setTimeout(initializeGame, 5000);
+                }
+            }
+
+            function showModal(imageSrc) {
+                modalImage.src = imageSrc;
+                cardModal.classList.remove('hidden');
+            }
+
+            // Cette fonction est maintenant appelée par le clic de l'utilisateur sur le modal (pour les non-paires)
+            // ou automatiquement par le jeu (pour les paires).
+            function hideModalAndProcess() {
+                cardModal.classList.add('hidden');
+                modalImage.src = '';
+
+                // Si deux cartes sont retournées ET qu'elles ne sont PAS une paire,
+                // alors on déclenche le retournement des cartes.
+                // Si c'est une paire, disableCards() a déjà géré la fermeture du modal.
+                const [card1, card2] = flippedCards;
+                if (card1 && card2 && card1.dataset.name !== card2.dataset.name) {
+                    unflipCards();
+                }
+            }
+
+            // Ajoute un écouteur d'événement pour le clic sur le modal pour le fermer MANUELLEMENT
+            cardModal.addEventListener('click', hideModalAndProcess);
+
+            initializeGame();
+        });
+    </script>
+</body>
+</html>
