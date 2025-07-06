@@ -165,24 +165,22 @@
             color: #333;
         }
 
-        .video-container {
+        /* Styles pour le lien de la vidéo */
+        .video-link {
+            display: block; /* Pour que le lien prenne toute la largeur */
             margin-top: 20px;
-            background-color: #e0f2f7; /* Fond bleu clair */
             padding: 15px;
+            background-color: #007bff; /* Couleur de fond du bouton */
+            color: white; /* Couleur du texte du bouton */
+            text-decoration: none; /* Pas de soulignement */
             border-radius: 8px;
-            border: 2px solid #a7d9eb; /* Bordure bleue */
+            font-size: 1.2em;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
         }
 
-        .video-container video {
-            width: 100%;
-            max-width: 400px;
-            border-radius: 8px;
-        }
-
-        .video-container p {
-            margin-top: 10px;
-            font-size: 1.1em;
-            color: #007bff; /* Texte bleu */
+        .video-link:hover {
+            background-color: #0056b3; /* Couleur au survol */
         }
 
         .hidden {
@@ -201,13 +199,13 @@
             justify-content: center;
             align-items: center;
             z-index: 1000; /* Assure qu'il est au-dessus de tout */
-            padding: 20px;
+            padding: 5px; /* Très petit padding pour laisser une fine bordure noire */
             box-sizing: border-box;
         }
 
         .card-modal img {
-            max-width: 90%; /* Max 90% de la largeur de la fenêtre */
-            max-height: 90%; /* Max 90% de la hauteur de la fenêtre */
+            max-width: calc(100% - 10px); /* Prend 100% de la largeur du modal moins le padding total (5px de chaque côté) */
+            max-height: calc(100% - 10px); /* Prend 100% de la hauteur du modal moins le padding total */
             object-fit: contain; /* L'image s'adapte sans être coupée */
             border: 5px solid white; /* Bordure blanche autour de l'image */
             border-radius: 10px; /* Bords arrondis */
@@ -240,15 +238,11 @@
             <!-- Les cartes seront générées ici par JavaScript -->
         </div>
         <div class="message" id="game-message"></div>
+        <!-- Conteneur pour le lien de la vidéo, initialement caché -->
         <div class="video-container hidden" id="video-container">
-            <!-- REMPLACEZ 'VOTRE_LIEN_DIRECT_VIDEO.mp4' PAR L'URL DIRECTE DE VOTRE FICHIER VIDÉO.
-                 Les liens de pages (ex: Streamable.com/...) ne fonctionnent pas ici.
-                 Vous avez besoin d'un lien qui se termine par .mp4, .webm, etc. -->
-            <video id="reward-video" controls>
-                <source src="https://drive.google.com/file/d/1yWxHMqB0Nsv1xHtfgcmVC93jvzasvL9c/view?usp=sharing" type="video/mp4">
-                Votre navigateur ne supporte pas la lecture de vidéos.
-            </video>
-            <p>Félicitations ! Vous avez débloqué cette vidéo spéciale !</p>
+            <a href="https://e.pcloud.link/publink/show?code=XZ19M6ZTA41otOltWyUiSu5BeB6TVVL6HTX" target="_blank" class="video-link">
+                Clique ici pour accéder à la vidéo
+            </a>
         </div>
     </div>
 
@@ -273,7 +267,7 @@
             const scoreBoard = document.getElementById('score-board'); // Récupération du score-board
             const gameMessage = document.getElementById('game-message');
             const videoContainer = document.getElementById('video-container');
-            const rewardVideo = document.getElementById('reward-video');
+            // const rewardVideo = document.getElementById('reward-video'); // Plus nécessaire, remplacé par un lien
             const cardModal = document.getElementById('card-modal');
             const modalImage = document.getElementById('modal-image');
             const centralCheckmarkContainer = document.getElementById('central-checkmark-container');
@@ -326,9 +320,9 @@
                 lockBoard = false;
                 movesCountSpan.textContent = moves;
                 gameMessage.textContent = '';
-                videoContainer.classList.add('hidden');
-                rewardVideo.pause();
-                rewardVideo.currentTime = 0;
+                videoContainer.classList.add('hidden'); // Cache le conteneur du lien vidéo
+                // rewardVideo.pause(); // Plus nécessaire
+                // rewardVideo.currentTime = 0; // Plus nécessaire
                 cardModal.classList.add('hidden'); // Assure que le modal est caché au démarrage du jeu
                 centralCheckmarkContainer.classList.remove('show'); // Cache le checkmark central
 
@@ -448,16 +442,16 @@
                     gameTitle.textContent = 'Félicitations 🎉';
 
                     // Affiche le message de victoire
-                    gameMessage.textContent = `Bravo ! Vous avez trouvé toutes les paires en ${moves} coups !`;
+                    gameMessage.textContent = `Tu as trouvé toutes les paires en ${moves} coups !`;
 
                     if (moves <= MAX_MOVES) {
-                        gameMessage.textContent += ` Vous avez gagné en ${moves} coups ! Vidéo débloquée !`;
+                        // Affiche le conteneur du lien vidéo
                         videoContainer.classList.remove('hidden');
-                        rewardVideo.play();
+                        // Le texte du message est déjà mis à jour, il faut juste ajouter le lien si nécessaire
+                        // Le lien est déjà dans le HTML, donc pas besoin de le recréer ici.
                     } else {
-                        gameMessage.textContent += ` Mais vous avez utilisé ${moves} coups (max ${MAX_MOVES}). Réessayez pour la vidéo !`;
-                        // Optionnel: Vous pouvez masquer la vidéo si le seuil n'est pas atteint
-                        videoContainer.classList.add('hidden');
+                        gameMessage.textContent += ` Mais tu as utilisé ${moves} coups (max ${MAX_MOVES}). Réessaye pour la vidéo !`;
+                        videoContainer.classList.add('hidden'); // S'assurer que le lien vidéo est caché si le seuil n'est pas atteint
                     }
                     // La page reste statique, pas de setTimeout pour redémarrer le jeu
                 }
