@@ -231,8 +231,9 @@
 </head>
 <body>
     <div class="game-container">
-        <h1>Réussis ce memory en moins de 16 coups et débloque une vidéo 👶 !</h1>
-        <div class="score-board">
+        <!-- Le titre sera mis à jour dynamiquement à la fin du jeu -->
+        <h1 id="game-title">Réussis ce memory en moins de 16 coups et débloque une vidéo 👶 !</h1>
+        <div class="score-board" id="score-board">
             Coups: <span id="moves-count">0</span> / 16
         </div>
         <div class="memory-game" id="memory-game">
@@ -240,9 +241,11 @@
         </div>
         <div class="message" id="game-message"></div>
         <div class="video-container hidden" id="video-container">
-            <!-- URL de votre vidéo Streamable -->
+            <!-- REMPLACEZ 'VOTRE_LIEN_DIRECT_VIDEO.mp4' PAR L'URL DIRECTE DE VOTRE FICHIER VIDÉO.
+                 Les liens de pages (ex: Streamable.com/...) ne fonctionnent pas ici.
+                 Vous avez besoin d'un lien qui se termine par .mp4, .webm, etc. -->
             <video id="reward-video" controls>
-                <source src="https://streamable.com/ybbbzx" type="video/mp4">
+                <source src="VOTRE_LIEN_DIRECT_VIDEO.mp4" type="video/mp4">
                 Votre navigateur ne supporte pas la lecture de vidéos.
             </video>
             <p>Félicitations ! Vous avez débloqué cette vidéo spéciale !</p>
@@ -264,8 +267,10 @@
         /* Logique JavaScript intégrée pour le jeu de Memory */
         document.addEventListener('DOMContentLoaded', () => {
             // Récupération des éléments du DOM
+            const gameTitle = document.getElementById('game-title'); // Récupération du titre
             const gameBoard = document.getElementById('memory-game');
             const movesCountSpan = document.getElementById('moves-count');
+            const scoreBoard = document.getElementById('score-board'); // Récupération du score-board
             const gameMessage = document.getElementById('game-message');
             const videoContainer = document.getElementById('video-container');
             const rewardVideo = document.getElementById('reward-video');
@@ -305,6 +310,12 @@
             }
 
             function initializeGame() {
+                // Réinitialise l'affichage pour le début du jeu
+                gameTitle.textContent = 'Réussis ce memory en moins de 16 coups et débloque une vidéo 👶 !';
+                scoreBoard.classList.remove('hidden');
+                gameBoard.classList.remove('hidden'); // S'assurer que le plateau est visible
+                gameBoard.style.pointerEvents = 'auto'; // Réactiver les clics sur le plateau
+
                 cards = [...imageNames, ...imageNames];
                 shuffle(cards);
 
@@ -428,15 +439,27 @@
 
             function checkGameEnd() {
                 if (matchedCards === cards.length) {
-                    gameMessage.textContent = 'Bravo ! Vous avez trouvé toutes les paires !';
+                    // Masque le plateau de jeu et le score board
+                    gameBoard.classList.add('hidden');
+                    scoreBoard.classList.add('hidden');
+                    gameBoard.style.pointerEvents = 'none'; // Désactiver les clics sur le plateau
+
+                    // Met à jour le titre
+                    gameTitle.textContent = 'Félicitations 🎉';
+
+                    // Affiche le message de victoire
+                    gameMessage.textContent = `Bravo ! Vous avez trouvé toutes les paires en ${moves} coups !`;
+
                     if (moves <= MAX_MOVES) {
                         gameMessage.textContent += ` Vous avez gagné en ${moves} coups ! Vidéo débloquée !`;
                         videoContainer.classList.remove('hidden');
                         rewardVideo.play();
                     } else {
                         gameMessage.textContent += ` Mais vous avez utilisé ${moves} coups (max ${MAX_MOVES}). Réessayez pour la vidéo !`;
+                        // Optionnel: Vous pouvez masquer la vidéo si le seuil n'est pas atteint
+                        videoContainer.classList.add('hidden');
                     }
-                    setTimeout(initializeGame, 5000);
+                    // La page reste statique, pas de setTimeout pour redémarrer le jeu
                 }
             }
 
