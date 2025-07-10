@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Le Jeu des Paires</title>
+    <title>Jeu des Paires</title>
     <style>
         /* Styles CSS intégrés pour le jeu de Memory */
         body {
@@ -204,8 +204,8 @@
         }
 
         .card-modal img {
-            max-width: calc(100% - 10px); /* Prend 100% de la largeur du modal moins le padding total (5px de chaque côté) */
-            max-height: calc(100% - 10px); /* Prend 100% de la hauteur du modal moins le padding total */
+            max-width: calc(150% - 0px); /* Prend 100% de la largeur du modal moins le padding total (5px de chaque côté) */
+            max-height: calc(150% - 0px); /* Prend 100% de la hauteur du modal moins le padding total */
             object-fit: contain; /* L'image s'adapte sans être coupée */
             border: 5px solid white; /* Bordure blanche autour de l'image */
             border-radius: 10px; /* Bords arrondis */
@@ -290,7 +290,7 @@
             let moves = 0;
             let lockBoard = false; // Verrouille le plateau pour empêcher d'autres clics pendant les animations/vérifications
 
-            const MAX_MOVES = 20; // Seuil de coups modifié à 16
+            const MAX_MOVES = 14; // Seuil de coups modifié à 14
 
             // Couleurs pour le dos des cartes
             const colorBlue = '#4A90E2'; // Un joli bleu
@@ -305,7 +305,7 @@
 
             function initializeGame() {
                 // Réinitialise l'affichage pour le début du jeu
-                gameTitle.textContent = 'Réussis ce memory en moins de 16 coups et débloque une vidéo 👶 !';
+                gameTitle.textContent = 'Réussis ce memory en moins de 14 coups et débloque une vidéo 👶 !';
                 scoreBoard.classList.remove('hidden');
                 gameBoard.classList.remove('hidden'); // S'assurer que le plateau est visible
                 gameBoard.style.pointerEvents = 'auto'; // Réactiver les clics sur le plateau
