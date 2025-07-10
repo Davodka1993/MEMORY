@@ -11,7 +11,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100%; /* Hauteur minimale de 100% de la fenêtre */
+            min-height: 100vh; /* Hauteur minimale de 100% de la fenêtre */
             margin: 0;
             background-color: #f0f0f0; /* Couleur de fond légère */
             overflow: hidden; /* Empêche le défilement si le modal est actif */
@@ -20,7 +20,7 @@
 
         .game-container {
             background-color: #fff; /* Fond blanc pour le conteneur du jeu */
-            padding: 10px;
+            padding: 20px;
             border-radius: 10px; /* Bords arrondis */
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Ombre légère */
             text-align: center;
@@ -58,7 +58,7 @@
 
         .card {
             width: 100%;
-            height: 100%; /* Hauteur fixe pour les cartes, s'adaptera en largeur */
+            height: 80px; /* Hauteur fixe pour les cartes, s'adaptera en largeur */
             position: relative;
             transform-style: preserve-3d; /* Permet la transformation 3D des enfants */
             transition: transform 0.5s; /* Animation de retournement */
@@ -204,8 +204,8 @@
         }
 
         .card-modal img {
-            max-width: calc(100% - 0px); /* Prend 100% de la largeur du modal moins le padding total (5px de chaque côté) */
-            max-height: calc(100% - 0px); /* Prend 100% de la hauteur du modal moins le padding total */
+            max-width: calc(100% - 10px); /* Prend 100% de la largeur du modal moins le padding total (5px de chaque côté) */
+            max-height: calc(100% - 10px); /* Prend 100% de la hauteur du modal moins le padding total */
             object-fit: contain; /* L'image s'adapte sans être coupée */
             border: 5px solid white; /* Bordure blanche autour de l'image */
             border-radius: 10px; /* Bords arrondis */
@@ -240,8 +240,8 @@
         <div class="message" id="game-message"></div>
         <!-- Conteneur pour le lien de la vidéo, initialement caché -->
         <div class="video-container hidden" id="video-container">
-            <a href="https://drive.google.com/file/d/1WoBUVY7RNDw5J16rQmVS4s1C3asl6usy/view?usp=sharing">
-                Clique ici pour voir et/ou télécharger la vidéo
+            <a href="https://drive.google.com/file/d/1WoBUVY7RNDw5J16rQmVS4s1C3asl6usy/view?usp=sharing" target="_blank" class="video-link">
+                Clique ici pour accéder à la vidéo
             </a>
         </div>
     </div>
@@ -290,7 +290,7 @@
             let moves = 0;
             let lockBoard = false; // Verrouille le plateau pour empêcher d'autres clics pendant les animations/vérifications
 
-            const MAX_MOVES = 14; // Seuil de coups modifié à 14
+            const MAX_MOVES = 14; // Seuil de coups modifié à 16
 
             // Couleurs pour le dos des cartes
             const colorBlue = '#4A90E2'; // Un joli bleu
