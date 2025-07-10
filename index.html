@@ -230,9 +230,9 @@
 <body>
     <div class="game-container">
         <!-- Le titre sera mis à jour dynamiquement à la fin du jeu -->
-        <h1 id="game-title">Réussis ce memory en moins de 16 coups et débloque une vidéo 👶 !</h1>
+        <h1 id="game-title">Réussis ce memory en moins de 14 coups et débloque une vidéo 👶 !</h1>
         <div class="score-board" id="score-board">
-            Coups: <span id="moves-count">0</span> / 16
+            Coups: <span id="moves-count">0</span> / 14
         </div>
         <div class="memory-game" id="memory-game">
             <!-- Les cartes seront générées ici par JavaScript -->
@@ -240,8 +240,8 @@
         <div class="message" id="game-message"></div>
         <!-- Conteneur pour le lien de la vidéo, initialement caché -->
         <div class="video-container hidden" id="video-container">
-            <a href="https://e.pcloud.link/publink/show?code=XZ19M6ZTA41otOltWyUiSu5BeB6TVVL6HTX" target="_blank" class="video-link">
-                Clique ici pour accéder à la vidéo
+            <a href="https://drive.google.com/file/d/1WoBUVY7RNDw5J16rQmVS4s1C3asl6usy/view?usp=sharing">
+                Clique ici pour voir et/ou télécharger la vidéo
             </a>
         </div>
     </div>
@@ -290,7 +290,7 @@
             let moves = 0;
             let lockBoard = false; // Verrouille le plateau pour empêcher d'autres clics pendant les animations/vérifications
 
-            const MAX_MOVES = 16; // Seuil de coups modifié à 16
+            const MAX_MOVES = 20; // Seuil de coups modifié à 16
 
             // Couleurs pour le dos des cartes
             const colorBlue = '#4A90E2'; // Un joli bleu
